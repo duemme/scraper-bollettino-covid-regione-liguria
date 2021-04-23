@@ -169,7 +169,7 @@ def extract_sorveglianze_attive():
         table_5_values = [cell.get_text(strip=True) for cell in tables[5].find_all('p')]
         for i in range(2, 13, 2):
             sorveglianze_attive[table_5_values[i].replace(' ', '_')] = int(table_5_values[i + 1].replace('.', ''))
-
+    return sorveglianze_attive
 
 url = 'https://www.regione.liguria.it/homepage/salute-e-sociale/homepage-coronavirus/bollettino-coronavirus/dati-marzo-2021.html'
 links = extract_links(url)
