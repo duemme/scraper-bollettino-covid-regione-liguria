@@ -14,7 +14,7 @@ import json
 
 locale.setlocale(locale.LC_TIME, "it_IT")
 
-day = 21
+day = 26
 url = f'https://www.regione.liguria.it/homepage/salute-e-sociale/homepage-coronavirus/bollettino-coronavirus/dati-{day}-4-2021.html'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, 'html.parser')
@@ -26,12 +26,20 @@ for table in soup.find_all('table', {'style': 'width: 99%;'}):
 
 # data report
 def data_report():
-    data_raw = soup.find('div', {'itemprop': "dateCreated"}).get_text(strip=True)
-    regex = re.search(r"(\d\d) (\w+) (\d\d\d\d)", data_raw)
-    data_raw_2 = regex.group(1) + '-' + regex.group(2) + '-' + regex.group(3)
-    d = datetime.strptime(data_raw_2, '%d-%B-%Y')
-    date: str = d.strftime('%Y-%m-%d')
-    return date
+    try:
+        data_raw = soup.find('div', {'itemprop': "dateCreated"}).get_text(strip=True)
+        regex = re.search(r"(\d\d) (\w+) (\d\d\d\d)", data_raw)
+        data_raw_2 = regex.group(1) + '-' + regex.group(2) + '-' + regex.group(3)
+        d = datetime.strptime(data_raw_2, '%d-%B-%Y')
+        date: str = d.strftime('%Y-%m-%d')
+        return date
+    except:
+        data_raw = soup.find('span', {'class': "fc_item_title"}).get_text(strip=True)
+        regex = re.search(r"(\d+) (\w+) (\d\d\d\d)", data_raw)
+        data_raw_2 = regex.group(1) + '-' + regex.group(2) + '-' + regex.group(3)
+        d = datetime.strptime(data_raw_2, '%d-%B-%Y')
+        date: str = d.strftime('%Y-%m-%d')
+        return date
 
 
 data_r = data_report()
@@ -61,7 +69,7 @@ if 'SAVONA' in table_1_values[2]:
         casi_provincia[table_1_values[i].replace(' ', '_')] = int(table_1_values[i + 1].replace('.', ''))
 else:
     for i in range(1, 12, 2):
-        casi_provincia[table_1_values[i].replace(' ', '_')] = int(table_1_values[i + 1].replace('.', ''))
+         casi_provincia[table_1_values[i].replace(' ', '_')] = int(table_1_values[i + 1].replace('.', ''))
 
 # Ospedalizzati
 
@@ -98,20 +106,27 @@ deceduti['parziale'] = int(table_3_values[8].replace('.', ''))
 
 dettaglio_deceduti = {}
 table_4_values = [cell.get_text(strip=True) for cell in tables[4].find_all('td')]
-if data_r == '2021-04-18':
+if 'decesso' in table_4_values[0]:
     for i in range(1, deceduti['parziale'] + 1):
         dettaglio_deceduti[i] = {}
-        dettaglio_deceduti[i][table_4_values[0].replace(' ', '_')] = table_4_values[i * 4].replace(' ', '_')
-        dettaglio_deceduti[i][table_4_values[1].replace(' ', '_')] = table_4_values[(i * 4) + 1].replace(' ', '_')
-        dettaglio_deceduti[i][table_4_values[2].replace(' ', '_')] = int(table_4_values[(i * 4) + 2].replace('.', ''))
-        dettaglio_deceduti[i][table_4_values[3].replace(' ', '_')] = table_4_values[(i * 4) + 3].replace(' ', '_')
+        dettaglio_deceduti[i]['Data_decesso'] = table_4_values[i * 4].replace(' ', '_')
+        dettaglio_deceduti[i]['Sesso'] = table_4_values[(i * 4) + 1].replace(' ', '_')
+        dettaglio_deceduti[i]['Età'] = int(table_4_values[(i * 4) + 2].replace('.', ''))
+        dettaglio_deceduti[i]['Luogo_decesso'] = table_4_values[(i * 4) + 3].replace(' ', '_')
+elif '1' in table_4_values[0]:
+    for i in range(0, deceduti['parziale']):
+        dettaglio_deceduti[i + 1] = {}
+        dettaglio_deceduti[i + 1]['Data_decesso'] = table_4_values[(i * 5) + 1].replace(' ', '_')
+        dettaglio_deceduti[i + 1]['Sesso'] = table_4_values[(i * 5) + 2].replace(' ', '_')
+        dettaglio_deceduti[i + 1]['Età'] = int(table_4_values[(i * 5) + 3].replace('.', ''))
+        dettaglio_deceduti[i + 1]['Luogo_decesso'] = table_4_values[(i * 5) + 4].replace(' ', '_')
 else:
     for i in range(1, deceduti['parziale'] + 1):
         dettaglio_deceduti[i] = {}
-        dettaglio_deceduti[i][table_4_values[1].replace(' ', '_')] = table_4_values[(i * 5)+1].replace(' ', '_')
-        dettaglio_deceduti[i][table_4_values[2].replace(' ', '_')] = table_4_values[(i * 5) + 2].replace(' ', '_')
-        dettaglio_deceduti[i][table_4_values[3].replace(' ', '_')] = int(table_4_values[(i * 5) + 3].replace('.', ''))
-        dettaglio_deceduti[i][table_4_values[4].replace(' ', '_')] = table_4_values[(i * 5) + 4].replace(' ', '_')
+        dettaglio_deceduti[i]['Data_decesso'] = table_4_values[(i * 5) + 1].replace(' ', '_')
+        dettaglio_deceduti[i]['Sesso'] = table_4_values[(i * 5) + 2].replace(' ', '_')
+        dettaglio_deceduti[i]['Età'] = int(table_4_values[(i * 5) + 3].replace('.', ''))
+        dettaglio_deceduti[i]['Luogo_decesso'] = table_4_values[(i * 5) + 4].replace(' ', '_')
 # sorveglianze attive
 
 sorveglianze_attive = {}
