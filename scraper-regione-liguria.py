@@ -16,7 +16,7 @@ locale.setlocale(locale.LC_TIME, "it_IT")
 
 #day = 30
 #url = f'https://www.regione.liguria.it/homepage/salute-e-sociale/homepage-coronavirus/bollettino-coronavirus/dati-{day}-4-2021.html'
-url = 'https://www.regione.liguria.it/homepage/salute-e-sociale/homepage-coronavirus/bollettino-coronavirus.html'
+url = 'https://www.regione.liguria.it/homepage/salute-e-sociale/homepage-coronavirus/bollettino-coronavirus/dati-21-5-2021.html'
 r = requests.get(url)
 soup = BeautifulSoup(r.text, 'html.parser')
 
